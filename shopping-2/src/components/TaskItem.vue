@@ -1,7 +1,13 @@
 <template>
+
   <div>
+
     <div>
+
       <div>
+
+
+
         <div class="clickable" @click="showPrice = !showPrice">
           <div class="clickable" @click="showQuantity = !showQuantity">
             <input
@@ -13,40 +19,56 @@
             />
           </div>
         </div>
-        <button v-show="!showPrice" @click="editTitle = !editTitle">
+
+
+
+        <button @click="editTitle = !editTitle">
           {{ editTitleButton }}
         </button>
+
+        
       </div>
+
     </div>
+
+
+
     <div v-show="showPrice">
       <textarea
         :disabled="!editPrice"
-        v-model="task.itemDesc"
+        v-model="task.itemPrice"
         @blur.stop="editPrice = false"
       ></textarea>
     </div>
-        <div v-show="showQuantity">
+
+    <div v-show="showQuantity">
       <textarea
         :disabled="!editQuantity"
-        v-model="task.itemDesc"
+        v-model="task.itemQuantity"
         @blur.stop="editQuantity = false"
       ></textarea>
     </div>
+
     {{ task.itemStatus }}
+    
     <button
       v-show="showPrice"
       @click="editPrice = !editPrice"
     >
       {{ editPriceButton }}
     </button>
-        <button
-      v-show="showeditQuantity"
-      @click="editeditQuantity = !editeditQuantity"
+
+    <button
+      v-show="showQuantity"
+      @click="editQuantity = !editQuantity"
     >
       {{ editQuantityButton }}
     </button>
+
     <button @click="setStatusButton">{{ statusButton }}</button>
+
     <button @click="moveToDeleted">Delete</button>
+
   </div>
 </template>
 
@@ -56,7 +78,7 @@ export default {
   props: {
     taskDetails: {
       taskTitle: String,
-      taskDescription: String,
+      taskPrice: String,
       taskQuantity: String,
       taskStatus: String,
       taskId: Number
@@ -71,7 +93,7 @@ export default {
       editTitle: false,
       task: {
         itemTitle: this.taskDetails.taskTitle,
-        itemDesc: this.taskDetails.taskDescription,
+        itemPrice: this.taskDetails.taskPrice,
         itemQuantity: this.taskDetails.taskQuantity,
         itemStatus: this.taskDetails.taskStatus,
         itemId: this.taskDetails.taskId
@@ -91,16 +113,19 @@ export default {
   },
   computed: {
     editTitleButton() {
-      return this.editTitle ? "save" : "edit";
+      return this.editTitle ? "save" : "edit title";
     },
     editPriceButton() {
-      return this.editPrice ? "save" : "edit";
+      return this.editPrice ? "save" : "edit price";
     },
     editQuantityButton() {
-      return this.editQuantity ? "save" : "edit";
+      return this.editQuantity ? "save" : "edit quantity";
     },
     statusButton() {
       return this.task.itemStatus === "todo" ? "Done" : "Todo";
+    },
+    sum() {
+      return this.itemPrice * this.itemQuantity
     }
   }
 };

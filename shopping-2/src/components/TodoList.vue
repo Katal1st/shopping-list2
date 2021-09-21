@@ -40,7 +40,8 @@ export default {
       // adds a new task to the array
       let newTask = {
         taskTitle: task.newTaskTitle,
-        taskDescription: task.newTaskPrice,
+        taskPrice: task.newTaskPrice,
+        taskQuantity: task.newtaskQuantity,
         taskStatus: "todo",
         taskId: this.newTaskId
       };
@@ -53,7 +54,8 @@ export default {
       this.tasks.forEach(task => {
         if (task.taskId === updatedTask.itemId) {
           task.taskTitle = updatedTask.itemTitle;
-          task.taskDescription = updatedTask.itemDesc;
+          task.taskPrice = updatedTask.itemPrice;
+          task.taskQuantity = updatedTask.itemQuantity;
           task.taskStatus = updatedTask.itemStatus;
         }
       });

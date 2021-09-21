@@ -20,8 +20,7 @@ export default {
       task: {
         newTaskTitle: "",
         newTaskPrice: "",
-        newTaskQuantity: ""
-
+        newTaskQuantity: "",
       }
     };
   },
