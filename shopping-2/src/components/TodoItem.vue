@@ -5,7 +5,7 @@
         <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">{{ title }}</div>
         <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">quantity: {{ quantity }}</div>
         <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">cost: {{ cost }}$</div>
-        <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">sum: {{ quantity * cost }}$</div>
+        <div v-if="!editing" @dblclick="editTodo" class="todo-item-label" :class="{ completed : completed }">sum: {{ sum }}$</div>
         <input v-else class="todo-item-edit" type="text" v-model="title" @blur="doneEdit" @keyup.enter="doneEdit" @keyup.esc="cancelEdit" v-focus>
       </div>
       <div class="remove-item" @click="removeTodo(todo.id)">
@@ -85,6 +85,11 @@ export default {
       this.cost = this.beforeEditCache
       this.editing = false
     },
+  },
+  computed: {
+    sum() {
+      return this.cost * this.quantity
+    }
   }
 }
 </script>
