@@ -1,95 +1,206 @@
-
 <template>
-  <div class="hello">
-    <div class="filter-bar">
-      <button @click="filterBy = 'all'">all</button>
-      <button @click="filterBy = 'todo'">todo</button>
-      <button @click="filterBy = 'done'">done</button>
+  <div>
+    <input type="text" class="todo-input" placeholder="What needs to be buy" v-model="newTodo" @keyup.enter="addTodo">
+    <input type="text" class="todo-input" placeholder="Quantity" v-model="quantity" @keyup.enter="addTodo">
+    <input type="text" class="todo-input" placeholder="Cost" v-model="cost" @keyup.enter="addTodo">
+    <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
+    <todo-item v-for="todo in todosFiltered" :key="todo.id" :todo="todo" :checkAll="!anyRemaining" @removedTodo="removeTodo" @finishedEdit="finishedEdit">
+    </todo-item>
+    </transition-group>
+
+    <div class="extra-container">
+      <div><label><input type="checkbox" :checked="!anyRemaining" @change="checkAllTodos"> Check All</label></div>
+      <div>{{ remaining }} items left</div>
+      <div>{{ completing }} items complete</div>
     </div>
-    <new-task @create-new-task="createNewTask"></new-task>
-    <div v-for="task in tasksToShow" :key="task.taskId">
-      <task-item
-        class="blue"
-        :task-details="task"
-        @task-update="updateATask"
-      ></task-item>
+
+    <div class="extra-container">
+      <div>
+        <button :class="{ active: filter == 'all' }" @click="filter = 'all'">All</button>
+        <button :class="{ active: filter == 'active' }" @click="filter = 'active'">Active</button>
+        <button :class="{ active: filter == 'completed' }" @click="filter = 'completed'">Completed</button>
+      </div>
+
+      <div>
+        <transition name="fade">
+        <button v-if="showClearCompletedButton" @click="clearCompleted">Clear Completed</button>
+        </transition>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script>
-import TaskItem from "./TaskItem";
-import NewTask from "./NewTask";
+import TodoItem from './TodoItem'
 export default {
-  name: "TodoList",
-  components: { NewTask, TaskItem },
-  props: {
-    // msg: String
+  name: 'todo-list',
+  components: {
+    TodoItem,
   },
-  data() {
+  data () {
     return {
-      tasks: [],
-      filterBy: "all"
-    };
-  },
-  mounted() {
-    this.getFromLocalStorage();
-  },
-  methods: {
-    createNewTask(task) {
-      // adds a new task to the array
-      let newTask = {
-        taskTitle: task.newTaskTitle,
-        taskPrice: task.newTaskPrice,
-        taskQuantity: task.newtaskQuantity,
-        taskStatus: "todo",
-        taskId: this.newTaskId
-      };
-      if (newTask.taskTitle.length > 0) {
-        this.tasks.push(newTask);
-        this.saveToLocalStorage();
-      }
-    },
-    updateATask(updatedTask) {
-      this.tasks.forEach(task => {
-        if (task.taskId === updatedTask.itemId) {
-          task.taskTitle = updatedTask.itemTitle;
-          task.taskPrice = updatedTask.itemPrice;
-          task.taskQuantity = updatedTask.itemQuantity;
-          task.taskStatus = updatedTask.itemStatus;
-        }
-      });
-      this.saveToLocalStorage();
-    },
-    getFromLocalStorage() {
-      if (localStorage.tasks) this.tasks = JSON.parse(localStorage.getItem("tasks"));
-    },
-    saveToLocalStorage() {
-      localStorage.setItem("tasks",JSON.stringify(this.tasks));
-    },
+      newTodo: '',
+      quantity: '',
+      cost: '',
+      idForTodo: 3,
+      filter: 'all',
+      todos: [
+        {
+          'id': 1,
+          'title': 'mango',
+          'quantity': '1',
+          'cost': '20',
+          'completed': false,
+          'editing': false,
+        },
+        {
+          'id': 2,
+          'title': 'apple',
+          'quantity': '5',
+          'cost': '2',
+          'completed': false,
+          'editing': false,
+        },
+      ]
+    }
   },
   computed: {
-    newTaskId() {
-      return (
-        this.tasks.reduce((max, curr) => Math.max(max, curr.taskId), 0) + 1
-      );
+    remaining() {
+      return this.todos.filter(todo => !todo.completed).length
     },
-    tasksToShow() {
-      return this.filterBy === "all"
-        ? this.tasks.filter(task => task.taskStatus !== "deleted")
-        : this.tasks.filter(task => task.taskStatus === this.filterBy);
+    completing() {
+      return this.todos.filter(todo => todo.completed).length
+    },
+    anyRemaining() {
+      return this.remaining != 0
+    },
+    todosFiltered() {
+      if (this.filter == 'all') {
+        return this.todos
+      } else if (this.filter == 'active') {
+        return this.todos.filter(todo => !todo.completed)
+      } else if (this.filter == 'completed') {
+        return this.todos.filter(todo => todo.completed)
+      }
+      return this.todos
+    },
+    showClearCompletedButton() {
+      return this.todos.filter(todo => todo.completed).length > 0
+    }
+  },
+  methods: {
+    addTodo() {
+      if (this.newTodo.trim().length == 0) {
+        return
+      }
+      this.todos.push({
+        id: this.idForTodo,
+        title: this.newTodo,
+        quantity: this.quantity,
+        cost: this.cost,
+        completed: false,
+      })
+      this.newTodo = ''
+      this.quantity = ''
+      this.cost = ''
+      this.idForTodo++
+    },
+    removeTodo(id) {
+      const index = this.todos.findIndex((item) => item.id == id)
+      this.todos.splice(index, 1)
+    },
+    checkAllTodos() {
+      this.todos.forEach((todo) => todo.completed = event.target.checked)
+    },
+    clearCompleted() {
+      this.todos = this.todos.filter(todo => !todo.completed)
+    },
+    finishedEdit(data) {
+      const index = this.todos.findIndex((item) => item.id == data.id)
+      this.todos.splice(index, 1, data)
     }
   }
-};
+}
 </script>
 
-<style scoped>
-.blue {
-  background-color: cornflowerblue;
+<style >
+  .todo-input {
+     width: 100%;
+     padding: 10px 18px;
+     font-size: 18px;
+     margin-bottom: 16px;
 }
-  .filter-bar{
-    display: flex;
-    justify-content: space-around;
-    padding: 3px 0;
+ .todo-input:focus {
+     outline: 0;
 }
+ .todo-item {
+     margin-bottom: 12px;
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     animation-duration: 0.3s;
+}
+ .remove-item {
+     cursor: pointer;
+     margin-left: 14px;
+}
+ .remove-item:hover {
+     color: black;
+}
+ .todo-item-left {
+     display: flex;
+     align-items: center;
+}
+ .todo-item-label {
+     padding: 10px;
+     border: 1px solid white;
+     margin-left: 12px;
+}
+ .todo-item-edit {
+     font-size: 24px;
+     color: #2c3e50;
+     margin-left: 12px;
+     width: 100%;
+     padding: 10px;
+     border: 1px solid #ccc;
+     font-family: 'Avenir', Helvetica, Arial, sans-serif;
+}
+ .todo-item-edit:focus {
+     outline: none;
+}
+ .completed {
+     text-decoration: line-through;
+     color: grey;
+}
+ .extra-container {
+     display: flex;
+     align-items: center;
+     justify-content: space-between;
+     font-size: 16px;
+     border-top: 1px solid lightgrey;
+     padding-top: 14px;
+     margin-bottom: 14px;
+}
+ button {
+     font-size: 14px;
+     background-color: white;
+     appearance: none;
+}
+ button:hover {
+     background: lightgreen;
+}
+ button:focus {
+     outline: none;
+}
+ .active {
+     background: lightgreen;
+}
+ .fade-enter-active, .fade-leave-active {
+     transition: opacity 0.2s;
+}
+ .fade-enter, .fade-leave-to {
+     opacity: 0;
+}
+ 
 </style>
